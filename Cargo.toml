@@ -1,5 +1,5 @@
 [package]
-name = "template"
+name = "taotie"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,9 +10,11 @@ anyhow = "1.0.89"
 arrow = { version = "53.0.0", features = ["prettyprint"] }
 chrono = { version = "0.4.38", features = ["serde"] }
 clap = { version = "4.5.18", features = ["derive"] }
+crossbeam-channel = "0.5.13"
 datafusion = { version = "42.0.0", features = ["serde"] }
+dirs = "5.0.1"
 polars = { version = "0.43.1", features = ["lazy", "parquet", "sql", "timezones"] }
-reedline-repl-rs = { version = "1.2.1", features = ["derive"] }
+reedline-repl-rs = { version = "1.2.1", features = ["async", "derive"] }
 serde = { version = "1.0.210", features = ["derive"] }
 serde_json = "1.0.128"
-tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros"] }
+tokio = { version = "1.40.0", features = ["rt", "rt-multi-thread", "macros", "fs"] }

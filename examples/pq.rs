@@ -39,7 +39,7 @@ async fn read_with_datafusion(file: &str) -> Result<()> {
     ctx.register_parquet("stats", file, Default::default())
         .await?;
     let data = ctx
-        .sql("SELECT email::text email,name::text name FROM stats limit 3")
+        .sql("SELECT * name FROM stats limit 3")
         .await?
         .collect()
         .await?;
