@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use arrow::util::pretty::pretty_format_batches;
-use datafusion::prelude::{SessionConfig, SessionContext};
+use datafusion::prelude::{CsvReadOptions, NdJsonReadOptions, SessionConfig, SessionContext};
 
 use crate::{
     cli::{ConnectOpts, DataSetConn},
@@ -26,12 +26,22 @@ impl Backend for DataFusionBackend {
             DataSetConn::Postgres(conn_str) => {
                 println!("Connecting to {}", conn_str)
             }
-            DataSetConn::Csv(filename) => {
-                self.register_csv(&opts.name, filename, Default::default())
+            DataSetConn::Csv(file_opts) => {
+                let csv_opts = CsvReadOptions {
+                    file_extension: &file_opts.ext,
+                    file_compression_type: file_opts.compression,
+                    ..Default::default()
+                };
+                self.register_csv(&opts.name, &file_opts.filename, csv_opts)
                     .await?;
             }
-            DataSetConn::NdJson(filename) => {
-                self.register_json(&opts.name, filename, Default::default())
+            DataSetConn::NdJson(file_opts) => {
+                let json_opts = NdJsonReadOptions {
+                    file_extension: &file_opts.ext,
+                    file_compression_type: file_opts.compression,
+                    ..Default::default()
+                };
+                self.register_json(&opts.name, &file_opts.filename, json_opts)
                     .await?;
             }
             DataSetConn::Parquet(filename) => {
