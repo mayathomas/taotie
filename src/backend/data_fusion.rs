@@ -82,7 +82,7 @@ impl Backend for DataFusionBackend {
     }
     async fn describe(&self, name: &str) -> anyhow::Result<impl ReplDisplay> {
         let df = self.0.sql(&format!("select * from {}", name)).await?;
-        let df = df.describe().await?;
+        // let df = df.describe().await?;
         let ddf = DescribeDataFrame::new(df);
         let record_batch = ddf.to_record_batch().await?;
         Ok(record_batch)
