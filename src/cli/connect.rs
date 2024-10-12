@@ -1,8 +1,8 @@
 use clap::{ArgMatches, Parser};
 
-use crate::ReplContext;
+use crate::{Backend, CmdExecutor, ReplContext, ReplMsg};
 
-use super::{ReplCommand, ReplResult};
+use super::ReplResult;
 
 #[derive(Debug, Parser)]
 pub struct ConnectOpts {
@@ -21,7 +21,7 @@ pub enum DataSetConn {
     Postgres(String),
     Csv(String),
     Parquet(String),
-    Json(String),
+    NdJson(String),
 }
 
 fn verify_conn_str(s: &str) -> Result<DataSetConn, String> {
@@ -32,8 +32,8 @@ fn verify_conn_str(s: &str) -> Result<DataSetConn, String> {
         Ok(DataSetConn::Csv(conn_str))
     } else if conn_str.ends_with(".parquet") {
         Ok(DataSetConn::Parquet(conn_str))
-    } else if conn_str.ends_with(".json") {
-        Ok(DataSetConn::Json(conn_str))
+    } else if conn_str.ends_with(".ndjson") {
+        Ok(DataSetConn::NdJson(conn_str))
     } else {
         Err(format!("Invalid connection string: {}", s))
     }
@@ -50,20 +50,19 @@ pub fn connect(args: ArgMatches, ctx: &mut ReplContext) -> ReplResult {
         .expect("expect name")
         .to_string();
 
-    let cmd = ConnectOpts::new(conn, table, name).into();
-    ctx.send(cmd);
-
-    Ok(None)
-}
-
-impl From<ConnectOpts> for ReplCommand {
-    fn from(value: ConnectOpts) -> Self {
-        ReplCommand::Connect(value)
-    }
+    let (msg, rx) = ReplMsg::new(ConnectOpts::new(conn, table, name));
+    Ok(ctx.send(msg, rx))
 }
 
 impl ConnectOpts {
     pub fn new(conn: DataSetConn, table: Option<String>, name: String) -> Self {
         Self { conn, table, name }
+    }
+}
+
+impl CmdExecutor for ConnectOpts {
+    async fn execute<T: Backend>(self, backend: &mut T) -> anyhow::Result<String> {
+        backend.connect(&self).await?;
+        Ok(format!("Connected to dataset: {}", self.name))
     }
 }
