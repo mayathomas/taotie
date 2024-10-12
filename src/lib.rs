@@ -86,13 +86,8 @@ impl ReplContext {
             eprint!("Repl Send Error: {}", e);
             std::process::exit(1);
         }
-        match rx.recv() {
-            Ok(data) => Some(data),
-            Err(e) => {
-                eprint!("Repl Recv Error: {}", e);
-                std::process::exit(1);
-            }
-        }
+        // if error return none
+        rx.recv().ok()
     }
 }
 
